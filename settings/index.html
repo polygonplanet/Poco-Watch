@@ -84,14 +84,26 @@
 
     <script>
     var STORE_KEYS = [
-      'accelPoint',
-      'accelDate'
+      'poco'
     ];
 
     var store = {
       bluetoothVibe: {
         value: 1,
         selector: '#bluetoothVibe',
+        get: function(el) {
+          return el.prop('checked') ? 1 : 0;
+        },
+        set: function(el, v) {
+          el.prop('checked', !!v);
+        },
+        fix: function(v) {
+          return (v - 0) ? 1 : 0;
+        }
+      },
+      resetAllOfData: {
+        value: 0,
+        selector: '#resetAllOfData',
         get: function(el) {
           return el.prop('checked') ? 1 : 0;
         },
@@ -111,18 +123,6 @@
       for (var i = 0, len = window.localStorage.length; i < len; i++) {
         key = window.localStorage.key(i);
         if (key != null && !~STORE_KEYS.indexOf(key)) {
-          window.localStorage.removeItem(key);
-        }
-      }
-    };
-
-
-    var resetAllOfData = function() {
-      var key;
-
-      for (var i = 0, len = window.localStorage.length; i < len; i++) {
-        key = window.localStorage.key(i);
-        if (key != null) {
           window.localStorage.removeItem(key);
         }
       }
@@ -194,10 +194,6 @@
           o[k] = (store[k].encode || f)(value);
           return o;
         }, {});
-
-        if ($('#resetAllOfData').prop('checked')) {
-          resetAllOfData();
-        }
 
         closeWin(values);
         ev.preventDefault();
