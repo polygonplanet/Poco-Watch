@@ -57,6 +57,31 @@
         </label>
       </div>
       <hr>
+      <div class="form-group date-format-group">
+        <label>
+          Date format:
+        </label>
+        <div class="dateFormat-group">
+          <label class="radio">
+            <input type="radio" name="dateFormat" value="1" class="dateFormat-default" checked="checked">
+            Week DD/MM
+          </label>
+          <label class="radio">
+            <input type="radio" name="dateFormat" value="2">
+            Week MM/DD
+          </label>
+          <label class="radio">
+            <input type="radio" name="dateFormat" value="3">
+            DD/MM Week
+          </label>
+          <label class="radio">
+            <input type="radio" name="dateFormat" value="4">
+            MM/DD Week
+          </label>
+        </div>
+      </div>
+      <!--
+      <hr>
       <div class="form-group">
         <label class="warnings">
           ! Reset all of data:
@@ -66,6 +91,7 @@
           OK
         </label>
       </div>
+      -->
       <hr>
       <div class="submit-group group-buttons">
         <button class="btn button-submit btn-primary btn-lg">
@@ -99,6 +125,40 @@
         },
         fix: function(v) {
           return (v - 0) ? 1 : 0;
+        }
+      },
+      dateFormat: {
+        value: 1,
+        selector: '.dateFormat-group',
+        get: function(el) {
+          var self = this;
+          var v;
+
+          $(this.selector + ' input[type=radio]').each(function() {
+            if ($(this).prop('checked')) {
+              v = $(this).val();
+            }
+          });
+
+          if (!v) {
+            $(this.selector + ' .dateFormat-default').prop('checked', true);
+            return this.fix(this.value);
+          }
+
+          return this.fix(v);
+        },
+        set: function(el, v) {
+          var self = this;
+
+          $(this.selector + ' input[type=radio]').each(function() {
+            $(this).prop('checked', self.fix(v) === self.fix($(this).val()));
+          });
+
+          return (this.value = this.fix($(this.selector + ' :checked').val()));
+        },
+        fix: function(v) {
+          var n = (v - 0) || 0;
+          return Math.max(1, Math.min(4, n));
         }
       },
       resetAllOfData: {
