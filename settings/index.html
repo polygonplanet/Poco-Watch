@@ -9,6 +9,7 @@
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
     <link href="css/style7329764f1a.css" rel="stylesheet">
+    <link href="css/jquery.jqplot.css" rel="stylesheet">
     <style>
     input[type=checkbox], input[type=radio] {
       -moz-transform: scale(1.5, 1.5);
@@ -33,6 +34,10 @@
 
     .loading:after {
       content: "Loading...";
+    }
+
+    #accelLevelGraph {
+      margin: 2em;
     }
     </style>
   </head>
@@ -104,10 +109,15 @@
         <a href="http://polygonpla.net/">polygon planet</a>.
       </div>
     </div>
+
+    <div class="graph-container">
+      <div id="accelLevelGraph"></div>
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
     <script src="js/jquery.touchtrapper.js"></script>
-    <script src="js/ccchart-min.js"></script>
+    <script src="js/jquery.jqplot.min.js"></script>
 
     <script>
     var STORE_KEYS = [
@@ -174,6 +184,25 @@
         fix: function(v) {
           return (v - 0) ? 1 : 0;
         }
+      },
+      accelPointTotal: {
+        value: [],
+        get: function(el) {
+          return this.value;
+        },
+        set: function(el, v) {
+          var value = this.fix(v);
+          if (value && value[0] && value[0].date) {
+            this.value = value;
+          }
+          return this.value;
+        },
+        fix: function(v) {
+          if (typeof v === 'string') {
+            v = JSON.parse(decodeURIComponent(v));
+          }
+          return v;
+        }
       }
     };
 
@@ -222,6 +251,49 @@
     var closeWin = function(data) {
       var uri = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(data));
       window.location.href = uri;
+    };
+
+
+    var drawAccelPointGraph = function() {
+      var accelPointTotal = store.accelPointTotal.get() || [];
+
+      if (accelPointTotal.length < 2) {
+        return;
+      }
+
+      accelPointTotal.sort(function(a, b) {
+        return a > b ? 1  :
+               a < b ? -1 : 0;
+      });
+
+      var data = [];
+      accelPointTotal.forEach(function(v) {
+        var day = v.date.slice(6) - 0;
+        var point = (v.level * 100) + v.point;
+        data.push([day, point]);
+      });
+
+      var options = {
+        grid: {
+          drawGridLines: false,
+          gridLineColor: '#eee',
+          borderColor: '#ccc',
+          background: '#fff',
+          shadow: false
+        },
+        seriesDefaults: {
+          shadow: false
+        },
+        seriesColors: ['#428BCA'],
+        title: {
+          text: 'Accel Level'
+        },
+        axesDefaults: {
+          min: 0
+        }
+      };
+
+      $.jqplot('accelLevelGraph', [data], options);
     };
 
 
@@ -284,6 +356,8 @@
 
         setTimeout(checkFields, 64);
       }, 64);
+
+      drawAccelPointGraph();
     });
     </script>
 
