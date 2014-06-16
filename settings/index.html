@@ -99,8 +99,6 @@
         </button>
       </div>
       <hr>
-      <canvas id="accelLevelGraph"></canvas>
-      <hr>
       <div class="footer-addr">
         Poco Watch by
         <a href="http://polygonpla.net/">polygon planet</a>.
@@ -176,29 +174,6 @@
         fix: function(v) {
           return (v - 0) ? 1 : 0;
         }
-      },
-      accelPointTotal: {
-        value: [],
-        get: function() {
-          return this.value;
-        },
-        set: function(v) {
-          this.value.push(this.fix(v));
-          if (this.value.length > 30) {
-            this.value.shift();
-          }
-          return this.value;
-        },
-        fix: function(v) {
-          var date = v.date;
-          var point = (v.point - 0) || 0;
-          var level = (v.level - 0) || 0;
-          return {
-            date: date,
-            point: point,
-            level: level
-          };
-        }
       }
     };
 
@@ -247,50 +222,6 @@
     var closeWin = function(data) {
       var uri = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(data));
       window.location.href = uri;
-    };
-
-
-    var drawAccelPointGraph = function() {
-      var accelPointTotal = store.accelPointTotal.get() || [];
-
-      if (accelPointTotal.length <= 1) {
-        return;
-      }
-
-      var dates = ['Day'];
-      var points = ['Point'];
-
-      accelPointTotal.sort(function(a, b) {
-        return a > b ? 1  :
-               a < b ? -1 : 0;
-      });
-
-      accelPointTotal.forEach(function(v) {
-        var day = v.date.slice(6) - 0;
-        dates.push(day);
-
-        var point = (v.level * 100) + v.point;
-        points.push(point);
-      });
-
-      ccchart.init('accelLevelGraph', {
-        config: {
-          title: 'Accel Level',
-          type: 'bezi2',
-          xScaleXOffset: 4,
-          colorSet:
-            ['#ccc'],
-          bgGradient: {
-            direction: 'vertical',
-            'from': '#222',
-            'to': '#687478'
-          }
-        },
-        data: [
-          dates,
-          points
-        ]
-      });
     };
 
 
@@ -353,8 +284,6 @@
 
         setTimeout(checkFields, 64);
       }, 64);
-
-      drawAccelPointGraph();
     });
     </script>
 
