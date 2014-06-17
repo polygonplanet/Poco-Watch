@@ -118,6 +118,7 @@
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
     <script src="js/jquery.touchtrapper.js"></script>
     <script src="js/jquery.jqplot.min.js"></script>
+    <script src="js/jqplot.dateAxisRenderer.min.js"></script>
 
     <script>
     var STORE_KEYS = [
@@ -191,11 +192,7 @@
           return this.value;
         },
         set: function(el, v) {
-          var value = this.fix(v);
-          if (value && value[0] && value[0].date) {
-            this.value = value;
-          }
-          return this.value;
+          return (this.value = this.fix(v));
         },
         fix: function(v) {
           if (typeof v === 'string') {
@@ -261,17 +258,26 @@
         return;
       }
 
-      accelPointTotal.sort(function(a, b) {
-        return a > b ? 1  :
-               a < b ? -1 : 0;
-      });
+      var pad = function(v) {
+        return '' + (v < 10 ? '0' + v : v);
+      };
+
+      var getDate = function(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth()) + '-' + pad(d.getDate());
+      };
+
+      var today = new Date();
+      var maxDate = getDate(today);
 
       var data = [];
-      accelPointTotal.forEach(function(v) {
-        var day = v.date.slice(6) - 0;
-        var point = (v.level * 100) + v.point;
+      var day;
+
+      accelPointTotal.forEach(function(point, i) {
+        day = getDate(new Date(today.getTime() - ((i + 1) * (24 * 60 * 60 * 1000))));
         data.push([day, point]);
       });
+
+      var minDate = day;
 
       var options = {
         grid: {
@@ -286,10 +292,21 @@
         },
         seriesColors: ['#428BCA'],
         title: {
-          text: 'Accel Level'
+          text: 'Accel Level (7days)'
         },
-        axesDefaults: {
-          min: 0
+        axes: {
+          xaxis: {
+            renderer: $.jqplot.DateAxisRenderer,
+            min: minDate,
+            max: maxDate,
+            tickInterval: '1 days',
+            tickOptions: {
+              formatString: '%d'
+            }
+          },
+          yaxis: {
+            min: 0
+          }
         }
       };
 
